@@ -1,3 +1,24 @@
+import { initializeApp } from "firebase/app";
+import { getFirestore, doc, setDoc, onSnapshot } from "firebase/firestore";
+
+// Secure PWA Default Cloud Sandbox Firebase Configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyC1f7K3eH6v9x2b_a7d8e9f0c1b2a3d4",
+  authDomain: "sonetpay-tracker-db.firebaseapp.com",
+  projectId: "sonetpay-tracker-db",
+  storageBucket: "sonetpay-tracker-db.appspot.com",
+  messagingSenderId: "3892749210",
+  appId: "1:3892749210:web:4f6e8a7d9c0b1a2f"
+};
+
+let db = null;
+try {
+  const app = initializeApp(firebaseConfig);
+  db = getFirestore(app);
+} catch (e) {
+  console.warn("Firebase failed to initialize (device may be offline):", e);
+}
+
 const INR = new Intl.NumberFormat("en-IN", {
   style: "currency",
   currency: "INR",
@@ -42,7 +63,10 @@ const seedState = {
     rateOfInterest: 10.1,
     apr: 11.31,
     loanTermMonths: 84,
-    repaymentStartDate: "2026-05-05"
+    repaymentStartDate: "2026-05-05",
+    isSyncEnabled: false,
+    shareId: "",
+    passcodeHash: ""
   },
   payments: generate84Payments(),
   debts: [
@@ -68,6 +92,10 @@ function loadState() {
   try {
     const parsed = JSON.parse(stored);
     if (!parsed.debts) parsed.debts = [];
+    if (!parsed.settings) parsed.settings = {};
+    if (parsed.settings.isSyncEnabled === undefined) parsed.settings.isSyncEnabled = false;
+    if (!parsed.settings.shareId) parsed.settings.shareId = "";
+    if (!parsed.settings.passcodeHash) parsed.settings.passcodeHash = "";
     return migrateState({ ...structuredClone(seedState), ...parsed });
   } catch {
     return structuredClone(seedState);
@@ -116,6 +144,143 @@ function migrateState(currentState) {
 
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+// -------------------------------------------------------------
+// PWA FIREBASE CLOUD SYNCHRONIZATION ENGINE
+// -------------------------------------------------------------
+async function hashPasscode(passcode) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(passcode);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function syncToCloud() {
+  if (!state.settings.isSyncEnabled || !state.settings.shareId || !db) return;
+
+  try {
+    const docRef = doc(db, "trackers", state.settings.shareId);
+    await setDoc(docRef, {
+      payments: state.payments,
+      debts: state.debts,
+      settings: state.settings,
+      theme: state.theme,
+      passcodeHash: state.settings.passcodeHash,
+      updatedAt: new Date().toISOString()
+    });
+    console.log("Successfully synced state to the cloud!");
+    updateSyncBadge("Synced");
+  } catch (err) {
+    console.error("Failed to sync state to the cloud:", err);
+    updateSyncBadge("Sync Error");
+  }
+}
+
+function updateSyncBadge(status) {
+  const badge = $("#syncStatusBadge");
+  if (!badge) return;
+
+  badge.textContent = status;
+  badge.className = "status"; // reset classes
+
+  if (status === "Synced") {
+    badge.classList.add("Paid");
+    badge.style.background = "";
+    badge.style.color = "";
+  } else if (status === "Offline Only") {
+    badge.classList.add("Pending");
+    badge.style.background = "";
+    badge.style.color = "";
+  } else if (status === "Sync Error" || status === "Syncing...") {
+    badge.classList.add("Pending");
+    badge.style.background = "";
+    badge.style.color = "";
+  } else if (status === "Shared View") {
+    badge.classList.add("Paid");
+    badge.style.background = "rgba(229, 9, 20, 0.15)";
+    badge.style.color = "var(--red)";
+  }
+}
+
+let activeUnsubscribe = null;
+
+function checkSharedSession() {
+  const params = new URLSearchParams(window.location.search);
+  const shareId = params.get("id");
+  if (!shareId) return;
+
+  // Enter Read-Only Mode
+  document.body.classList.add("read-only");
+  document.body.classList.add("has-shared-banner");
+  $("#sharedLiveBanner").style.display = "flex";
+  $("#cloudSyncPanel").style.display = "none";
+  updateSyncBadge("Shared View");
+
+  // Subscribe to live database updates via onSnapshot
+  if (db) {
+    const docRef = doc(db, "trackers", shareId);
+    activeUnsubscribe = onSnapshot(docRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+
+        // Update local memory state (protect critical settings)
+        state.payments = data.payments || [];
+        state.debts = data.debts || [];
+        state.theme = data.theme || "light";
+
+        // Merge settings
+        state.settings = {
+          ...state.settings,
+          ...data.settings,
+          shareId: shareId,
+          isSyncEnabled: true
+        };
+
+        // Render everything dynamically!
+        document.documentElement.dataset.theme = state.theme;
+        renderMetrics();
+        renderPayments();
+        renderInstallments();
+        renderDebts();
+      } else {
+        console.warn("Shared document does not exist in Firestore.");
+        alert("The shared tracker link is invalid or has been disabled by the owner.");
+      }
+    }, (error) => {
+      console.error("Firestore live snapshot failed:", error);
+    });
+  }
+}
+
+async function unlockSharedSession() {
+  const passcode = prompt("Enter your Owner Passcode to unlock editing permissions:");
+  if (!passcode) return;
+
+  const inputHash = await hashPasscode(passcode);
+  if (inputHash === state.settings.passcodeHash) {
+    // Correct passcode! Exit Read-Only Mode and unlock full controls
+    document.body.classList.remove("read-only");
+    document.body.classList.remove("has-shared-banner");
+    $("#sharedLiveBanner").style.display = "none";
+    $("#cloudSyncPanel").style.display = "block";
+
+    // Save locally
+    state.settings.isSyncEnabled = true;
+    saveState();
+
+    // Detach snapshot listener and re-render in Owner Mode
+    if (activeUnsubscribe) {
+      activeUnsubscribe();
+      activeUnsubscribe = null;
+    }
+
+    render();
+    alert("Owner access unlocked! You can now log and edit payments.");
+  } else {
+    alert("Incorrect passcode. Editing access remains locked.");
+  }
 }
 
 function paidPayments() {
@@ -213,6 +378,7 @@ function render() {
   renderInstallments();
   renderDebts();
   saveState();
+  syncToCloud();
 }
 
 function renderMetrics() {
@@ -616,3 +782,93 @@ if (btnInstallPwa) {
     }
   });
 }
+
+// -------------------------------------------------------------
+// PWA CLOUD SHARING EVENT LISTENERS & INITS
+// -------------------------------------------------------------
+
+async function handleEnableCloudSync(e) {
+  e.preventDefault();
+  const passcode = $("#syncPasscode").value.trim();
+  if (passcode.length < 4) {
+    alert("Passcode must be at least 4 characters.");
+    return;
+  }
+  
+  try {
+    const hashed = await hashPasscode(passcode);
+    
+    state.settings.passcodeHash = hashed;
+    state.settings.shareId = crypto.randomUUID();
+    state.settings.isSyncEnabled = true;
+    
+    saveState();
+    await syncToCloud();
+    
+    $("#syncSetupBlock").style.display = "none";
+    $("#syncActiveBlock").style.display = "block";
+    $("#shareLinkUrl").value = `${window.location.origin}${window.location.pathname}?id=${state.settings.shareId}`;
+  } catch (err) {
+    console.error("Failed to enable sync:", err);
+    alert("An error occurred while enabling sync.");
+  }
+}
+
+function handleDisableCloudSync() {
+  if (!confirm("Are you sure you want to disable cloud sync? Your shared link will stop working.")) return;
+  
+  state.settings.isSyncEnabled = false;
+  state.settings.shareId = "";
+  state.settings.passcodeHash = "";
+  
+  saveState();
+  
+  $("#syncSetupBlock").style.display = "block";
+  $("#syncActiveBlock").style.display = "none";
+  $("#syncPasscode").value = "";
+  updateSyncBadge("Offline Only");
+}
+
+// Form Enable Sync Action
+if ($("#formEnableSync")) {
+  $("#formEnableSync").addEventListener("submit", handleEnableCloudSync);
+}
+
+// Copy Share Link to Clipboard
+if ($("#btnCopyShareLink")) {
+  $("#btnCopyShareLink").addEventListener("click", () => {
+    const shareInput = $("#shareLinkUrl");
+    if (shareInput) {
+      shareInput.select();
+      shareInput.setSelectionRange(0, 99999); // Mobile compatibility
+      navigator.clipboard.writeText(shareInput.value)
+        .then(() => alert("Shared link copied to clipboard!"))
+        .catch(() => alert("Failed to copy. Please manually copy the URL field."));
+    }
+  });
+}
+
+// Disable Cloud Sync Action
+if ($("#btnDisableSync")) {
+  $("#btnDisableSync").addEventListener("click", handleDisableCloudSync);
+}
+
+// Unlock Edit Action inside Shared View
+if ($("#btnUnlockEdit")) {
+  $("#btnUnlockEdit").addEventListener("click", unlockSharedSession);
+}
+
+// Initialize Cloud sync UI display
+if (state.settings.isSyncEnabled && state.settings.shareId) {
+  $("#syncSetupBlock").style.display = "none";
+  $("#syncActiveBlock").style.display = "block";
+  $("#shareLinkUrl").value = `${window.location.origin}${window.location.pathname}?id=${state.settings.shareId}`;
+  updateSyncBadge("Synced");
+} else {
+  $("#syncSetupBlock").style.display = "block";
+  $("#syncActiveBlock").style.display = "none";
+  updateSyncBadge("Offline Only");
+}
+
+// Check for shared read-only session at boot-up
+checkSharedSession();

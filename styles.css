@@ -1629,3 +1629,87 @@ menu {
     font-size: 0.85rem;
   }
 }
+
+/* Floating Shared Live Read-Only Alert Banner */
+.shared-live-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 44px;
+  background: rgba(17, 20, 27, 0.9);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(229, 9, 20, 0.3);
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 0 16px;
+  color: #f7f8fb;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  animation: bannerSlideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes bannerSlideDown {
+  from { transform: translateY(-44px); }
+  to { transform: translateY(0); }
+}
+
+.shared-live-banner p {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.banner-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(229, 9, 20, 0.15);
+  color: var(--red);
+  border: 1px solid rgba(229, 9, 20, 0.3);
+  border-radius: 6px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  letter-spacing: 0.08em;
+}
+
+.pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--red);
+  display: inline-block;
+  animation: dotPulse 1.6s infinite ease-in-out;
+  box-shadow: 0 0 8px var(--red);
+}
+
+@keyframes dotPulse {
+  0% { transform: scale(0.8); opacity: 0.4; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(0.8); opacity: 0.4; }
+}
+
+/* Adjust layout when shared banner is visible */
+body.has-shared-banner .app-shell {
+  margin-top: 44px;
+}
+
+/* Strict PWA Read-Only Mode Visibility Locking */
+body.read-only [data-open-payment],
+body.read-only #tab-history .section-heading button,
+body.read-only #debtForm,
+body.read-only #cloudSyncPanel,
+body.read-only table th:last-child,
+body.read-only table td:last-child {
+  display: none !important;
+}
+
+/* Lock out double-tap row edits on PWA mobile view when read-only */
+body.read-only tr button {
+  pointer-events: none !important;
+}

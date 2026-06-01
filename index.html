@@ -12,8 +12,23 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="apple-touch-icon" href="Public/icon-192.png?v=20260601-pwa-popup-v5" />
+    <script type="importmap">
+      {
+        "imports": {
+          "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
+          "firebase/firestore": "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"
+        }
+      }
+    </script>
   </head>
   <body>
+    <!-- Floating Live Shared Banner (shown in Read-Only shared view) -->
+    <div id="sharedLiveBanner" class="shared-live-banner" style="display: none;">
+      <div class="banner-badge"><span class="pulse-dot"></span>LIVE</div>
+      <p>Viewing Shared Read-Only Ledger</p>
+      <button id="btnUnlockEdit" class="ghost-btn small" type="button">Unlock Edit</button>
+    </div>
+
     <div class="app-shell">
       <aside class="sidebar" aria-label="Main navigation">
         <div class="brand">
@@ -112,6 +127,38 @@
                 <div class="mini-stats">
                   <span><b id="paidCount">0</b> paid</span>
                   <span><b id="pendingCount">0</b> pending</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Premium PWA Cloud Synchronization Card -->
+          <section class="panel module progress-panel" id="cloudSyncPanel" style="margin-top: 16px;">
+            <div class="section-heading">
+              <div>
+                <span class="eyebrow">Real-time ledger access</span>
+                <h2>Cloud Synchronization</h2>
+              </div>
+              <span class="status Pending" id="syncStatusBadge" style="margin: 0; font-size: 0.72rem; font-weight: 800; text-transform: uppercase;">Offline Only</span>
+            </div>
+            
+            <div class="sync-card-layout" style="margin-top: 14px;">
+              <!-- Sync Setup Block: Enable cloud sync -->
+              <div id="syncSetupBlock" style="display: block;">
+                <p style="margin: 0 0 12px 0; font-size: 0.86rem; color: var(--muted); line-height: 1.5;">Enable live cloud sync to securely back up your ledger and generate an automatically-updating read-only link for friends or family.</p>
+                <form id="formEnableSync" class="compact-form" style="display: flex; gap: 10px; align-items: center; width: 100%;">
+                  <input id="syncPasscode" type="password" minlength="4" maxlength="12" placeholder="Create Owner Passcode (4-12 characters)" required style="flex: 1; min-height: 40px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 12px; background: rgba(0,0,0,0.02); color: var(--text);" />
+                  <button class="primary-btn small" type="submit" style="width: auto; min-height: 40px;">Enable Sync</button>
+                </form>
+              </div>
+
+              <!-- Sync Active Block: Share link displays -->
+              <div id="syncActiveBlock" style="display: none;">
+                <p style="margin: 0 0 12px 0; font-size: 0.86rem; color: var(--muted); line-height: 1.5;">Your ledger is live and securely synced in the cloud. Anyone with the link below can view your metrics and history in real-time.</p>
+                <div class="share-link-group" style="display: flex; gap: 10px; align-items: center; width: 100%;">
+                  <input id="shareLinkUrl" type="text" readonly style="flex: 1; min-height: 40px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 12px; background: rgba(0,0,0,0.05); font-family: monospace; font-size: 0.78rem; cursor: pointer; color: var(--text);" />
+                  <button class="primary-btn small" id="btnCopyShareLink" type="button" style="width: auto; min-height: 40px; white-space: nowrap;">Copy Link</button>
+                  <button class="ghost-btn small" id="btnDisableSync" type="button" style="width: auto; min-height: 40px; color: var(--red); border-color: rgba(229, 9, 20, 0.2); white-space: nowrap;">Disable</button>
                 </div>
               </div>
             </div>
