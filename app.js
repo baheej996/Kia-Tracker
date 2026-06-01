@@ -1,14 +1,16 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore, doc, setDoc, onSnapshot } from "firebase/firestore";
 
-// Secure PWA Default Cloud Sandbox Firebase Configuration
+// Private Firebase Configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyC1f7K3eH6v9x2b_a7d8e9f0c1b2a3d4",
-  authDomain: "sonetpay-tracker-db.firebaseapp.com",
-  projectId: "sonetpay-tracker-db",
-  storageBucket: "sonetpay-tracker-db.appspot.com",
-  messagingSenderId: "3892749210",
-  appId: "1:3892749210:web:4f6e8a7d9c0b1a2f"
+  apiKey: "AIzaSyCMAE9bXNifvIdGkB80-WW-Rosz6nXInb8",
+  authDomain: "sonetpay-org.firebaseapp.com",
+  databaseURL: "https://sonetpay-org-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "sonetpay-org",
+  storageBucket: "sonetpay-org.firebasestorage.app",
+  messagingSenderId: "559759112253",
+  appId: "1:559759112253:web:5096251a496f77c0cf1254",
+  measurementId: "G-70T85V4SQ6"
 };
 
 let db = null;
