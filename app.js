@@ -485,3 +485,8 @@ $("#debtForm").addEventListener("submit", (event) => {
 $("#debtDate").value = new Date().toISOString().slice(0, 10);
 render();
 switchSubTab("pending");
+
+// Prevent text copying via copy command
+document.addEventListener("copy", (event) => {
+  event.preventDefault();
+});
