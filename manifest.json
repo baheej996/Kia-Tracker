@@ -1,0 +1,24 @@
+{
+  "name": "SonetPay Tracker",
+  "short_name": "SonetPay",
+  "description": "Premium Kia ownership payment ledger, timeline, and borrowing companion.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#090a0f",
+  "theme_color": "#11141b",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "Public/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "Public/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ]
+}
