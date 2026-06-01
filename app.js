@@ -5,7 +5,28 @@ const INR = new Intl.NumberFormat("en-IN", {
 });
 
 const STORAGE_KEY = "sonetpay-tracker-state";
-const KFS_VERSION = "CF04058719-2026-03-26";
+const KFS_VERSION = "CF04058719-2026-06-01-84EMI";
+
+function generate84Payments() {
+  const payments = [];
+  for (let i = 1; i <= 84; i++) {
+    const year = 2026 + Math.floor((4 + i - 1) / 12);
+    const monthIndex = (4 + i - 1) % 12;
+    const month = String(monthIndex + 1).padStart(2, "0");
+    const dateStr = `${year}-${month}-05`;
+
+    payments.push({
+      id: crypto.randomUUID(),
+      date: dateStr,
+      amount: 15995,
+      mode: "EMI",
+      reference: `KFS-CF04058719-EMI-${String(i).padStart(2, "0")}`,
+      status: "Pending",
+      note: `EMI ${i} of 84 as per KFS`
+    });
+  }
+  return payments;
+}
 
 const seedState = {
   settings: {
@@ -23,14 +44,7 @@ const seedState = {
     loanTermMonths: 84,
     repaymentStartDate: "2026-05-05"
   },
-  payments: [
-    { id: crypto.randomUUID(), date: "2026-05-05", amount: 15995, mode: "EMI", reference: "KFS-CF04058719-EMI-01", status: "Pending", note: "EMI 1 of 84 as per KFS" },
-    { id: crypto.randomUUID(), date: "2026-06-05", amount: 15995, mode: "EMI", reference: "KFS-CF04058719-EMI-02", status: "Pending", note: "EMI 2 of 84 as per KFS" },
-    { id: crypto.randomUUID(), date: "2026-07-05", amount: 15995, mode: "EMI", reference: "KFS-CF04058719-EMI-03", status: "Pending", note: "EMI 3 of 84 as per KFS" },
-    { id: crypto.randomUUID(), date: "2026-08-05", amount: 15995, mode: "EMI", reference: "KFS-CF04058719-EMI-04", status: "Pending", note: "EMI 4 of 84 as per KFS" },
-    { id: crypto.randomUUID(), date: "2026-09-05", amount: 15995, mode: "EMI", reference: "KFS-CF04058719-EMI-05", status: "Pending", note: "EMI 5 of 84 as per KFS" },
-    { id: crypto.randomUUID(), date: "2026-10-05", amount: 15995, mode: "EMI", reference: "KFS-CF04058719-EMI-06", status: "Pending", note: "EMI 6 of 84 as per KFS" }
-  ],
+  payments: generate84Payments(),
   debts: [
     { id: crypto.randomUUID(), name: "Father", type: "Borrowed", amount: 150000, date: "2026-04-15", note: "Downpayment support" },
     { id: crypto.randomUUID(), name: "Father", type: "Returned", amount: 50000, date: "2026-05-20", note: "Part payment return" },
@@ -63,14 +77,38 @@ function loadState() {
 function migrateState(currentState) {
   if (currentState.settings?.kfsVersion === KFS_VERSION) return currentState;
 
-  const placeholderData = currentState.payments?.some((payment) => payment.reference?.startsWith("AUTO-EMI") || payment.reference === "KIA-DP-001");
+  const standard84 = generate84Payments();
   const nextState = {
     ...currentState,
-    settings: { ...currentState.settings, ...structuredClone(seedState.settings) }
+    settings: { ...currentState.settings, ...structuredClone(seedState.settings), kfsVersion: KFS_VERSION }
   };
 
-  if (placeholderData) {
-    nextState.payments = structuredClone(seedState.payments);
+  if (currentState.payments && currentState.payments.length > 0) {
+    const existingMap = new Map();
+    currentState.payments.forEach((p) => {
+      if (p.date) {
+        existingMap.set(p.date, p);
+      }
+    });
+
+    const mergedPayments = standard84.map((std) => {
+      const match = existingMap.get(std.date);
+      if (match) {
+        return {
+          ...std,
+          ...match,
+          id: match.id || std.id
+        };
+      }
+      return std;
+    });
+
+    const standardDates = new Set(standard84.map((std) => std.date));
+    const customPayments = currentState.payments.filter((p) => p.date && !standardDates.has(p.date));
+
+    nextState.payments = [...customPayments, ...mergedPayments];
+  } else {
+    nextState.payments = standard84;
   }
 
   return nextState;
@@ -207,8 +245,14 @@ function renderPayments() {
     .filter((payment) => {
       const haystack = `${payment.mode} ${payment.reference} ${payment.note}`.toLowerCase();
       return !search || haystack.includes(search);
-    })
-    .sort((a, b) => new Date(b.date) - new Date(a.date));
+    });
+
+  // Pending payments sorted from current/oldest to upcoming, others descending (latest first)
+  if (status === "Pending") {
+    rows.sort((a, b) => new Date(a.date) - new Date(b.date));
+  } else {
+    rows.sort((a, b) => new Date(b.date) - new Date(a.date));
+  }
 
   $("#paymentRows").innerHTML = rows.map((payment) => `
     <tr>
@@ -231,12 +275,26 @@ function renderInstallments() {
   const items = state.payments
     .slice()
     .sort((a, b) => new Date(a.date) - new Date(b.date))
-    .map((payment, index) => `
-      <div class="installment ${payment.status === "Pending" ? "pending" : ""}">
-        <strong>${index === 0 ? "Down payment" : `Installment ${index}`}: ${INR.format(payment.amount)}</strong>
-        <span>${formatDate(payment.date)} - ${payment.status} via ${payment.mode}</span>
-      </div>
-    `);
+    .map((payment, index) => {
+      let title = "";
+      if (payment.mode?.toLowerCase() === "down payment" || payment.note?.toLowerCase().includes("down payment")) {
+        title = "Down Payment";
+      } else if (payment.note && payment.note.includes("EMI")) {
+        title = payment.note.split(" as per")[0]; // e.g. "EMI 1 of 84"
+      } else if (payment.reference && payment.reference.includes("EMI")) {
+        const parts = payment.reference.split("-");
+        const num = parts[parts.length - 1];
+        title = `EMI ${parseInt(num) || num} of 84`;
+      } else {
+        title = `Installment ${index + 1}`;
+      }
+      return `
+        <div class="installment ${payment.status === "Pending" ? "pending" : ""}">
+          <strong>${title}: ${INR.format(payment.amount)}</strong>
+          <span>${formatDate(payment.date)} - ${payment.status} via ${payment.mode}</span>
+        </div>
+      `;
+    });
 
   $("#installmentList").innerHTML = items.join("");
 }
