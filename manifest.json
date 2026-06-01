@@ -9,13 +9,13 @@
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "Public/icon-192.png?v=20260601-pwa-popup-v4",
+      "src": "Public/icon-192.png?v=20260601-pwa-popup-v5",
       "type": "image/png",
       "sizes": "192x192",
       "purpose": "any maskable"
     },
     {
-      "src": "Public/icon-512.png?v=20260601-pwa-popup-v4",
+      "src": "Public/icon-512.png?v=20260601-pwa-popup-v5",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "any maskable"
