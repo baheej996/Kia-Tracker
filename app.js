@@ -557,3 +557,58 @@ if ("serviceWorker" in navigator) {
       .catch((err) => console.error("Service Worker registration failed:", err));
   });
 }
+
+// PWA Custom Install Prompt Banner
+let deferredPrompt = null;
+const pwaBanner = $("#pwaInstallBanner");
+const btnInstallPwa = $("#btnInstallPwa");
+const pwaInstructions = $("#pwaInstructions");
+
+// Detect Standalone/Installed Mode
+const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone;
+
+if (!isStandalone) {
+  // 1. Android/Desktop Chrome browser standard install trigger
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (pwaBanner) pwaBanner.style.display = "flex";
+  });
+
+  // 2. iOS Safari Custom Prompt Detection
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  if (isIOS) {
+    if (pwaBanner) {
+      pwaBanner.style.display = "flex";
+      if (pwaInstructions) {
+        pwaInstructions.textContent = "Tap Share icon below, then 'Add to Home Screen' to install.";
+      }
+      if (btnInstallPwa) {
+        btnInstallPwa.textContent = "Okay";
+        btnInstallPwa.addEventListener("click", () => {
+          pwaBanner.style.display = "none";
+        });
+      }
+    }
+  }
+}
+
+// Close Banner click action
+if ($("#closePwaBanner")) {
+  $("#closePwaBanner").addEventListener("click", () => {
+    if (pwaBanner) pwaBanner.style.display = "none";
+  });
+}
+
+// Install Button click action (triggers native prompt)
+if (btnInstallPwa) {
+  btnInstallPwa.addEventListener("click", async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log(`PWA install prompt choice: ${outcome}`);
+      deferredPrompt = null;
+      if (pwaBanner) pwaBanner.style.display = "none";
+    }
+  });
+}

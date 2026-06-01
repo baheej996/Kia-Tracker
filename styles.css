@@ -1449,7 +1449,8 @@ menu {
   .sidebar,
   .hero-actions,
   .row-actions,
-  dialog {
+  dialog,
+  .pwa-banner {
     display: none !important;
   }
 
@@ -1462,5 +1463,100 @@ menu {
   .panel {
     break-inside: avoid;
     box-shadow: none;
+  }
+}
+
+/* Premium PWA Install Banner */
+.pwa-banner {
+  position: fixed;
+  bottom: 84px; /* Suspended above the mobile bottom navigation bar */
+  left: 20px;
+  right: 20px;
+  max-width: 460px;
+  margin: 0 auto;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  border: 1px solid var(--line);
+  background: var(--surface-strong);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: var(--shadow);
+  border-radius: var(--radius);
+  animation: bannerSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes bannerSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.pwa-close {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 4px;
+}
+
+.pwa-close:hover {
+  color: var(--text);
+}
+
+.pwa-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.pwa-logo {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  object-fit: cover;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--line);
+}
+
+.pwa-text h3 {
+  margin: 0 0 2px 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.pwa-text p {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+#btnInstallPwa {
+  flex-shrink: 0;
+  min-width: 80px;
+}
+
+/* Adjust banner position for desktop */
+@media (min-width: 901px) {
+  .pwa-banner {
+    bottom: 24px;
+    left: 24px;
+    right: auto;
+    margin: 0;
   }
 }
