@@ -109,7 +109,6 @@ function render() {
   renderMetrics();
   renderPayments();
   renderInstallments();
-  renderReminders();
   saveState();
 }
 
@@ -178,23 +177,6 @@ function renderInstallments() {
 }
 
 
-function renderReminders() {
-  const upcoming = state.payments
-    .filter((payment) => payment.status === "Pending")
-    .sort((a, b) => new Date(a.date) - new Date(b.date))
-    .slice(0, 3);
-
-  $("#reminderList").innerHTML = upcoming.map((payment) => {
-    const days = Math.ceil((new Date(`${payment.date}T00:00:00`) - new Date()) / 86400000);
-    const label = days >= 0 ? `${days} days left` : `${Math.abs(days)} days overdue`;
-    return `
-      <div class="reminder-item">
-        <div><strong>${INR.format(payment.amount)} due</strong><span>${formatDate(payment.date)} - ${payment.mode}</span></div>
-        <span class="status Pending">${label}</span>
-      </div>
-    `;
-  }).join("") || `<div class="reminder-item"><div><strong>No pending reminders</strong><span>All scheduled payments are clear.</span></div></div>`;
-}
 
 
 function openPaymentDialog(payment = null) {

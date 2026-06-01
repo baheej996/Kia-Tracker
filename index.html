@@ -81,46 +81,34 @@
           </article>
         </section>
 
-        <section class="dashboard-grid">
-          <article class="panel progress-panel">
-            <div class="section-heading">
+        <section class="panel module progress-panel">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">Payment progress</span>
+              <h2>Ownership Completion</h2>
+            </div>
+            <strong id="progressLabel">0%</strong>
+          </div>
+          <div class="progress-layout">
+            <div class="ring" style="--progress: 0">
+              <svg viewBox="0 0 120 120" role="img" aria-label="Circular payment progress">
+                <circle cx="60" cy="60" r="51"></circle>
+                <circle cx="60" cy="60" r="51" id="progressRing"></circle>
+              </svg>
               <div>
-                <span class="eyebrow">Payment progress</span>
-                <h2>Ownership Completion</h2>
-              </div>
-              <strong id="progressLabel">0%</strong>
-            </div>
-            <div class="progress-layout">
-              <div class="ring" style="--progress: 0">
-                <svg viewBox="0 0 120 120" role="img" aria-label="Circular payment progress">
-                  <circle cx="60" cy="60" r="51"></circle>
-                  <circle cx="60" cy="60" r="51" id="progressRing"></circle>
-                </svg>
-                <div>
-                  <strong id="ringText">0%</strong>
-                  <span>complete</span>
-                </div>
-              </div>
-              <div class="progress-meta">
-                <div class="bar-track"><span id="progressBar"></span></div>
-                <p id="progressNarrative"></p>
-                <div class="mini-stats">
-                  <span><b id="paidCount">0</b> paid</span>
-                  <span><b id="pendingCount">0</b> pending</span>
-                </div>
+                <strong id="ringText">0%</strong>
+                <span>complete</span>
               </div>
             </div>
-          </article>
-
-          <article class="panel reminders">
-            <div class="section-heading">
-              <div>
-                <span class="eyebrow">Next steps</span>
-                <h2>Payment Reminders</h2>
+            <div class="progress-meta">
+              <div class="bar-track"><span id="progressBar"></span></div>
+              <p id="progressNarrative"></p>
+              <div class="mini-stats">
+                <span><b id="paidCount">0</b> paid</span>
+                <span><b id="pendingCount">0</b> pending</span>
               </div>
             </div>
-            <div id="reminderList" class="reminder-list"></div>
-          </article>
+          </div>
         </section>
 
         <section class="panel module" id="payments">
