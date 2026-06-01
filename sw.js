@@ -1,4 +1,4 @@
-const CACHE_NAME = "sonetpay-v20260601-84emi";
+const CACHE_NAME = "sonetpay-v20260601-sonetlogo";
 const ASSETS = [
   "./",
   "./index.html",
