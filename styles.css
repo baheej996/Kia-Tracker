@@ -1387,6 +1387,48 @@ menu {
     transform: translateY(0);
   }
 }
+/* Sub Navigation Tabs inside History */
+.sub-tabs {
+  display: flex;
+  gap: 8px;
+  margin: 18px 0;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 10px;
+}
+
+.sub-tab-btn {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 800;
+  font-size: 0.86rem;
+  padding: 8px 16px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.sub-tab-btn:hover {
+  color: var(--text);
+  background: rgba(20, 24, 34, 0.04);
+}
+
+[data-theme="dark"] .sub-tab-btn:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.sub-tab-btn.active {
+  color: var(--red);
+  background: rgba(229, 9, 20, 0.08);
+}
+
+.sub-tab-content {
+  display: none;
+  animation: tabFadeIn 0.3s ease both;
+}
+
+.sub-tab-content.active {
+  display: block;
+}
 
 @media print {
   .sidebar,

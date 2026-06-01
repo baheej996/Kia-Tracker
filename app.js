@@ -41,6 +41,8 @@ const seedState = {
 
 let state = loadState();
 let pendingDeletePaymentId = "";
+let pendingDeleteDebtId = "";
+let confirmType = ""; // "payment" or "debt"
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
@@ -132,6 +134,38 @@ function switchTab(tabId) {
   });
 
   window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function switchSubTab(subTabId) {
+  $$(".sub-tab-btn").forEach((el) => {
+    el.classList.remove("active");
+    if (el.getAttribute("data-sub-tab") === subTabId) {
+      el.classList.add("active");
+    }
+  });
+
+  const paymentsContent = $("#sub-tab-payments");
+  const timelineContent = $("#sub-tab-timeline");
+
+  if (subTabId === "timeline") {
+    paymentsContent.classList.remove("active");
+    timelineContent.classList.add("active");
+    paymentsContent.style.display = "none";
+    timelineContent.style.display = "block";
+  } else {
+    paymentsContent.classList.add("active");
+    timelineContent.classList.remove("active");
+    paymentsContent.style.display = "block";
+    timelineContent.style.display = "none";
+
+    const select = $("#statusFilter");
+    if (subTabId === "pending") {
+      select.value = "Pending";
+    } else if (subTabId === "completed") {
+      select.value = "Paid";
+    }
+    renderPayments();
+  }
 }
 
 function render() {
@@ -274,7 +308,22 @@ function openDeletePaymentDialog(paymentId) {
   if (!payment) return;
 
   pendingDeletePaymentId = paymentId;
+  confirmType = "payment";
+  $("#confirmTitle").textContent = "Delete payment log?";
   $("#confirmMessage").textContent = `${INR.format(payment.amount)} from ${formatDate(payment.date)} will be removed. This will update your total paid and remaining balance.`;
+  $("#confirmDeleteAction").textContent = "Delete payment";
+  $("#confirmDialog").showModal();
+}
+
+function openDeleteDebtDialog(debtId) {
+  const debt = state.debts.find((item) => item.id === debtId);
+  if (!debt) return;
+
+  pendingDeleteDebtId = debtId;
+  confirmType = "debt";
+  $("#confirmTitle").textContent = "Delete transaction?";
+  $("#confirmMessage").textContent = `${debt.type} transaction log of ${INR.format(debt.amount)} from ${debt.name} will be removed. This will update your co-funder outstanding balance.`;
+  $("#confirmDeleteAction").textContent = "Delete transaction";
   $("#confirmDialog").showModal();
 }
 
@@ -351,6 +400,13 @@ document.addEventListener("click", (event) => {
     return;
   }
 
+  const subTab = target.getAttribute("data-sub-tab");
+  if (subTab) {
+    event.preventDefault();
+    switchSubTab(subTab);
+    return;
+  }
+
   if (target.matches("[data-open-payment]")) openPaymentDialog();
 
   if (target.id === "exportToggle") {
@@ -368,24 +424,29 @@ document.addEventListener("click", (event) => {
   }
   const deleteDebtId = target.dataset.deleteDebt;
   if (deleteDebtId) {
-    state.debts = state.debts.filter((d) => d.id !== deleteDebtId);
-    render();
+    openDeleteDebtDialog(deleteDebtId);
   }
 
   if (target.closest(".nav-list a")) closeMobileMenu();
 });
 
 $("#savePayment").addEventListener("click", savePaymentFromForm);
-$("#confirmDeletePayment").addEventListener("click", () => {
-  if (!pendingDeletePaymentId) return;
-
-  state.payments = state.payments.filter((payment) => payment.id !== pendingDeletePaymentId);
-  pendingDeletePaymentId = "";
+$("#confirmDeleteAction").addEventListener("click", () => {
+  if (confirmType === "payment" && pendingDeletePaymentId) {
+    state.payments = state.payments.filter((payment) => payment.id !== pendingDeletePaymentId);
+    pendingDeletePaymentId = "";
+  } else if (confirmType === "debt" && pendingDeleteDebtId) {
+    state.debts = state.debts.filter((d) => d.id !== pendingDeleteDebtId);
+    pendingDeleteDebtId = "";
+  }
+  confirmType = "";
   $("#confirmDialog").close();
   render();
 });
 $("#confirmDialog").addEventListener("close", () => {
   pendingDeletePaymentId = "";
+  pendingDeleteDebtId = "";
+  confirmType = "";
 });
 $("#menuToggle").addEventListener("click", () => {
   const isOpen = document.body.classList.toggle("menu-open");
@@ -423,3 +484,4 @@ $("#debtForm").addEventListener("submit", (event) => {
 
 $("#debtDate").value = new Date().toISOString().slice(0, 10);
 render();
+switchSubTab("pending");

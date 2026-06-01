@@ -115,58 +115,67 @@
         </div>
 
         <div id="tab-history" class="tab-content">
-          <section class="panel module" id="payments">
-            <div class="section-heading">
-              <div>
-                <span class="eyebrow">Payment management</span>
-                <h2>Monthly Payment History</h2>
-              </div>
-              <button class="primary-btn small" type="button" data-open-payment>Add entry</button>
+          <!-- Main Section Header -->
+          <div class="section-heading" style="margin-bottom: 12px;">
+            <div>
+              <span class="eyebrow">Payment management</span>
+              <h2>Monthly Payment History</h2>
             </div>
-            <div class="filters">
-              <label>
-                Search
-                <input id="paymentSearch" type="search" placeholder="Bank, note, mode..." />
-              </label>
-              <label>
-                Status
-                <select id="statusFilter">
-                  <option value="all">All payments</option>
-                  <option value="Paid">Paid</option>
-                  <option value="Pending">Pending</option>
-                </select>
-              </label>
-              <label>
-                Month
-                <input id="monthFilter" type="month" />
-              </label>
-            </div>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Mode</th>
-                    <th>Reference</th>
-                    <th>Amount</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="paymentRows"></tbody>
-              </table>
-            </div>
-          </section>
+            <button class="primary-btn small" type="button" data-open-payment>Add entry</button>
+          </div>
 
-          <section class="panel module" id="installments">
-            <div class="section-heading">
-              <div>
-                <span class="eyebrow">Installment timeline</span>
-                <h2>Paid & Pending</h2>
+          <!-- Horizontal Sub-Tabs -->
+          <div class="sub-tabs">
+            <button class="sub-tab-btn active" data-sub-tab="pending">Pending</button>
+            <button class="sub-tab-btn" data-sub-tab="completed">Completed</button>
+            <button class="sub-tab-btn" data-sub-tab="timeline">Timeline</button>
+          </div>
+
+          <!-- Sub-Tab Content 1: Filtered Payments Table -->
+          <div id="sub-tab-payments" class="sub-tab-content active">
+            <section class="panel module" id="payments" style="border: 0; background: transparent; box-shadow: none; padding: 0;">
+              <div class="filters">
+                <label>
+                  Search
+                  <input id="paymentSearch" type="search" placeholder="Bank, note, mode..." />
+                </label>
+                <label style="display: none;">
+                  Status
+                  <select id="statusFilter">
+                    <option value="all">All payments</option>
+                    <option value="Paid">Paid</option>
+                    <option value="Pending" selected>Pending</option>
+                  </select>
+                </label>
+                <label>
+                  Month
+                  <input id="monthFilter" type="month" />
+                </label>
               </div>
-            </div>
-            <div class="installments" id="installmentList"></div>
-          </section>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Mode</th>
+                      <th>Reference</th>
+                      <th>Amount</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="paymentRows"></tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+
+          <!-- Sub-Tab Content 2: Installments timeline schedule -->
+          <div id="sub-tab-timeline" class="sub-tab-content" style="display: none;">
+            <section class="panel module" id="installments" style="border: 0; background: transparent; box-shadow: none; padding: 0;">
+              <div class="installments" id="installmentList"></div>
+            </section>
+          </div>
         </div>
 
         <div id="tab-debt" class="tab-content">
@@ -268,11 +277,11 @@
       <form method="dialog" class="confirm-card">
         <div class="confirm-mark">!</div>
         <span class="eyebrow">Confirm action</span>
-        <h2>Delete payment log?</h2>
+        <h2 id="confirmTitle">Delete payment log?</h2>
         <p id="confirmMessage">This payment will be removed from your tracker.</p>
         <menu>
           <button class="ghost-btn" value="cancel" type="submit">Keep payment</button>
-          <button class="danger-btn" id="confirmDeletePayment" value="default" type="button">Delete payment</button>
+          <button class="danger-btn" id="confirmDeleteAction" value="default" type="button">Delete payment</button>
         </menu>
       </form>
     </dialog>
