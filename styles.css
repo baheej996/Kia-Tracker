@@ -1308,6 +1308,66 @@ menu {
   }
 }
 
+/* Mobile Bottom Navigation */
+.mobile-nav {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .mobile-nav {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 68px;
+    z-index: 1000;
+    border-top: 1px solid var(--line);
+    background: color-mix(in srgb, var(--surface-strong) 92%, transparent);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.16);
+    padding: 6px 12px 10px;
+  }
+
+  .mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.72rem;
+    font-weight: 800;
+    flex: 1;
+    text-align: center;
+    transition: color 0.2s ease, transform 0.2s ease;
+  }
+
+  .mobile-nav-item svg {
+    width: 22px;
+    height: 22px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2.2;
+    transition: transform 0.2s ease;
+  }
+
+  .mobile-nav-item:active svg {
+    transform: scale(0.9);
+  }
+
+  .mobile-nav-item.active {
+    color: var(--red);
+  }
+
+  body {
+    padding-bottom: 78px;
+  }
+}
+
 @media print {
   .sidebar,
   .hero-actions,

@@ -31,6 +31,11 @@ const seedState = {
     { id: crypto.randomUUID(), date: "2026-09-05", amount: 15995, mode: "EMI", reference: "KFS-CF04058719-EMI-05", status: "Pending", note: "EMI 5 of 84 as per KFS" },
     { id: crypto.randomUUID(), date: "2026-10-05", amount: 15995, mode: "EMI", reference: "KFS-CF04058719-EMI-06", status: "Pending", note: "EMI 6 of 84 as per KFS" }
   ],
+  debts: [
+    { id: crypto.randomUUID(), name: "Father", type: "Borrowed", amount: 150000, date: "2026-04-15", note: "Downpayment support" },
+    { id: crypto.randomUUID(), name: "Father", type: "Returned", amount: 50000, date: "2026-05-20", note: "Part payment return" },
+    { id: crypto.randomUUID(), name: "Ahmad (Friend)", type: "Borrowed", amount: 30000, date: "2026-05-10", note: "Insurance cost support" }
+  ],
   theme: "light"
 };
 
@@ -45,7 +50,9 @@ function loadState() {
   if (!stored) return structuredClone(seedState);
 
   try {
-    return migrateState({ ...structuredClone(seedState), ...JSON.parse(stored) });
+    const parsed = JSON.parse(stored);
+    if (!parsed.debts) parsed.debts = [];
+    return migrateState({ ...structuredClone(seedState), ...parsed });
   } catch {
     return structuredClone(seedState);
   }
@@ -109,6 +116,7 @@ function render() {
   renderMetrics();
   renderPayments();
   renderInstallments();
+  renderDebts();
   saveState();
 }
 
@@ -175,6 +183,53 @@ function renderInstallments() {
 
   $("#installmentList").innerHTML = items.join("");
 }
+
+function renderDebts() {
+  const aggregates = {};
+  state.debts.forEach((d) => {
+    const name = d.name.trim();
+    if (!aggregates[name]) {
+      aggregates[name] = { borrowed: 0, returned: 0 };
+    }
+    if (d.type === "Borrowed") {
+      aggregates[name].borrowed += Number(d.amount);
+    } else if (d.type === "Returned") {
+      aggregates[name].returned += Number(d.amount);
+    }
+  });
+
+  const summaryHtml = Object.keys(aggregates).map((name) => {
+    const data = aggregates[name];
+    const outstanding = Math.max(data.borrowed - data.returned, 0);
+    return `
+      <tr>
+        <td data-label="Funder"><strong>${name}</strong></td>
+        <td data-label="Total Borrowed">${INR.format(data.borrowed)}</td>
+        <td data-label="Total Returned">${INR.format(data.returned)}</td>
+        <td data-label="Net Outstanding"><strong style="color: ${outstanding > 0 ? "var(--red)" : "#13a15f"}">${INR.format(outstanding)}</strong></td>
+      </tr>
+    `;
+  }).join("") || `<tr><td colspan="4">No borrowing balances recorded yet.</td></tr>`;
+  $("#debtSummaryRows").innerHTML = summaryHtml;
+
+  const logsHtml = state.debts
+    .slice()
+    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .map((d) => `
+      <tr>
+        <td data-label="Date">${formatDate(d.date)}</td>
+        <td data-label="Funder"><strong>${d.name}</strong></td>
+        <td data-label="Action"><span class="status ${d.type === "Borrowed" ? "Pending" : "Paid"}">${d.type}</span></td>
+        <td data-label="Amount"><strong>${INR.format(d.amount)}</strong></td>
+        <td data-label="Note">${d.note || "-"}</td>
+        <td data-label="Action">
+          <button class="icon-btn" type="button" title="Delete" data-delete-debt="${d.id}">Del</button>
+        </td>
+      </tr>
+    `).join("") || `<tr><td colspan="6">No transaction logs recorded yet.</td></tr>`;
+  $("#debtLogRows").innerHTML = logsHtml;
+}
+
 
 
 
@@ -281,8 +336,16 @@ document.addEventListener("click", (event) => {
   if (deletePayment) {
     openDeletePaymentDialog(deletePayment);
   }
+  const deleteDebtId = target.dataset.deleteDebt;
+  if (deleteDebtId) {
+    state.debts = state.debts.filter((d) => d.id !== deleteDebtId);
+    render();
+  }
 
-
+  if (target.closest(".mobile-nav-item")) {
+    $$(".mobile-nav-item").forEach((item) => item.classList.remove("active"));
+    target.closest(".mobile-nav-item").classList.add("active");
+  }
 
   if (target.closest(".nav-list a")) closeMobileMenu();
 });
@@ -318,4 +381,20 @@ $("#themeToggle").addEventListener("click", () => {
   state.theme = state.theme === "dark" ? "light" : "dark";
   render();
 });
+$("#debtForm").addEventListener("submit", (event) => {
+  event.preventDefault();
+  state.debts.push({
+    id: crypto.randomUUID(),
+    name: $("#debtName").value.trim(),
+    type: $("#debtType").value,
+    amount: Number($("#debtAmount").value),
+    date: $("#debtDate").value,
+    note: $("#debtNote").value.trim()
+  });
+  event.target.reset();
+  $("#debtDate").value = new Date().toISOString().slice(0, 10);
+  render();
+});
+
+$("#debtDate").value = new Date().toISOString().slice(0, 10);
 render();

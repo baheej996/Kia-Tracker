@@ -27,6 +27,7 @@
         <nav class="nav-list">
           <a href="#overview" class="active">Overview</a>
           <a href="#payments">Payments</a>
+          <a href="#debts">Ledger</a>
         </nav>
         <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle theme">
           <span></span>
@@ -163,6 +164,69 @@
           </div>
           <div class="installments" id="installmentList"></div>
         </section>
+
+        <section class="panel module" id="debts">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">Co-Funders Ledger</span>
+              <h2>Borrowing & Debts Ledger</h2>
+            </div>
+          </div>
+          
+          <form class="compact-form" id="debtForm">
+            <input id="debtName" type="text" placeholder="Funder name (e.g. Ahmad)" required />
+            <select id="debtType" required>
+              <option value="Borrowed">Borrowed</option>
+              <option value="Returned">Returned</option>
+            </select>
+            <input id="debtAmount" type="number" min="1" placeholder="Amount (INR)" required />
+            <input id="debtDate" type="date" required />
+            <input id="debtNote" type="text" placeholder="Note (optional)" style="flex: 1;" />
+            <button class="primary-btn small" type="submit">Log</button>
+          </form>
+          
+          <div class="section-heading" style="margin-top: 28px; margin-bottom: 12px;">
+            <div>
+              <span class="eyebrow">Summary metrics</span>
+              <h3>Outstanding Balances</h3>
+            </div>
+          </div>
+          <div class="table-wrap" style="margin-bottom: 28px;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Funder</th>
+                  <th>Total Borrowed</th>
+                  <th>Total Returned</th>
+                  <th>Net Outstanding Balance</th>
+                </tr>
+              </thead>
+              <tbody id="debtSummaryRows"></tbody>
+            </table>
+          </div>
+          
+          <div class="section-heading" style="margin-top: 28px; margin-bottom: 12px;">
+            <div>
+              <span class="eyebrow">Individual logs</span>
+              <h3>Transaction Logs</h3>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Funder</th>
+                  <th>Action</th>
+                  <th>Amount</th>
+                  <th>Note</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="debtLogRows"></tbody>
+            </table>
+          </div>
+        </section>
       </main>
     </div>
 
@@ -206,6 +270,21 @@
         </menu>
       </form>
     </dialog>
+    <!-- Mobile Bottom Navigation Bar -->
+    <nav class="mobile-nav" aria-label="Mobile navigation">
+      <a href="#overview" class="mobile-nav-item active" data-tab="home">
+        <svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span>Home</span>
+      </a>
+      <a href="#payments" class="mobile-nav-item" data-tab="history">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span>History</span>
+      </a>
+      <a href="#debts" class="mobile-nav-item" data-tab="debt">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        <span>Debt</span>
+      </a>
+    </nav>
 
     <script src="app.js?v=20260601-sonet-image" type="module"></script>
   </body>
