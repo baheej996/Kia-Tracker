@@ -25,9 +25,9 @@
           <span></span>
         </button>
         <nav class="nav-list">
-          <a href="#overview" class="active">Overview</a>
-          <a href="#payments">Payments</a>
-          <a href="#debts">Ledger</a>
+          <a href="#home" class="active" data-tab-link="home">Overview</a>
+          <a href="#history" data-tab-link="history">Payments</a>
+          <a href="#debt" data-tab-link="debt">Ledger</a>
         </nav>
         <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle theme">
           <span></span>
@@ -36,197 +36,203 @@
       </aside>
 
       <main class="main">
-        <header class="hero panel" id="overview">
-          <div class="hero-copy">
-            <span class="eyebrow">Premium Kia ownership companion</span>
-            <h1>SonetPay Tracker</h1>
-            <p>Track your Kia Sonet payment journey, ownership expenses, documents, and reminders from one calm automotive dashboard.</p>
-            <div class="hero-actions">
-              <button class="primary-btn" type="button" data-open-payment>Add payment</button>
-              <div class="export-menu">
-                <button class="ghost-btn" type="button" id="exportToggle" aria-expanded="false" aria-controls="exportOptions">Export</button>
-                <div class="export-options" id="exportOptions">
-                  <button type="button" id="exportExcel">Excel</button>
-                  <button type="button" id="exportPdf">PDF</button>
+        <div id="tab-home" class="tab-content active">
+          <header class="hero panel" id="overview">
+            <div class="hero-copy">
+              <span class="eyebrow">Premium Kia ownership companion</span>
+              <h1>SonetPay Tracker</h1>
+              <p>Track your Kia Sonet payment journey, ownership expenses, documents, and reminders from one calm automotive dashboard.</p>
+              <div class="hero-actions">
+                <button class="primary-btn" type="button" data-open-payment>Add payment</button>
+                <div class="export-menu">
+                  <button class="ghost-btn" type="button" id="exportToggle" aria-expanded="false" aria-controls="exportOptions">Export</button>
+                  <div class="export-options" id="exportOptions">
+                    <button type="button" id="exportExcel">Excel</button>
+                    <button type="button" id="exportPdf">PDF</button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div class="vehicle-card">
-            <div class="vehicle-glow"></div>
-            <img class="vehicle-image" src="Public/Sonet.png" alt="Kia Sonet" />
-            <p>Kia Sonet GTX+</p>
-          </div>
-        </header>
-
-        <section class="metrics-grid" aria-label="Payment summary">
-          <article class="metric-card panel">
-            <span>Total Loan Payable</span>
-            <strong id="metricCost"></strong>
-            <small>Principal + full interest</small>
-          </article>
-          <article class="metric-card panel">
-            <span>Sanctioned Loan</span>
-            <strong id="metricDown"></strong>
-            <small>Loan CF04058719</small>
-          </article>
-          <article class="metric-card panel">
-            <span>Total Paid</span>
-            <strong id="metricPaid"></strong>
-            <small>Payments recorded</small>
-          </article>
-          <article class="metric-card panel">
-            <span>Remaining Balance</span>
-            <strong id="metricRemaining"></strong>
-            <small id="expectedDate"></small>
-          </article>
-        </section>
-
-        <section class="panel module progress-panel">
-          <div class="section-heading">
-            <div>
-              <span class="eyebrow">Payment progress</span>
-              <h2>Ownership Completion</h2>
+            <div class="vehicle-card">
+              <div class="vehicle-glow"></div>
+              <img class="vehicle-image" src="Public/Sonet.png" alt="Kia Sonet" />
+              <p>Kia Sonet GTX+</p>
             </div>
-            <strong id="progressLabel">0%</strong>
-          </div>
-          <div class="progress-layout">
-            <div class="ring" style="--progress: 0">
-              <svg viewBox="0 0 120 120" role="img" aria-label="Circular payment progress">
-                <circle cx="60" cy="60" r="51"></circle>
-                <circle cx="60" cy="60" r="51" id="progressRing"></circle>
-              </svg>
+          </header>
+
+          <section class="metrics-grid" aria-label="Payment summary">
+            <article class="metric-card panel">
+              <span>Total Loan Payable</span>
+              <strong id="metricCost"></strong>
+              <small>Principal + full interest</small>
+            </article>
+            <article class="metric-card panel">
+              <span>Sanctioned Loan</span>
+              <strong id="metricDown"></strong>
+              <small>Loan CF04058719</small>
+            </article>
+            <article class="metric-card panel">
+              <span>Total Paid</span>
+              <strong id="metricPaid"></strong>
+              <small>Payments recorded</small>
+            </article>
+            <article class="metric-card panel">
+              <span>Remaining Balance</span>
+              <strong id="metricRemaining"></strong>
+              <small id="expectedDate"></small>
+            </article>
+          </section>
+
+          <section class="panel module progress-panel">
+            <div class="section-heading">
               <div>
-                <strong id="ringText">0%</strong>
-                <span>complete</span>
+                <span class="eyebrow">Payment progress</span>
+                <h2>Ownership Completion</h2>
+              </div>
+              <strong id="progressLabel">0%</strong>
+            </div>
+            <div class="progress-layout">
+              <div class="ring" style="--progress: 0">
+                <svg viewBox="0 0 120 120" role="img" aria-label="Circular payment progress">
+                  <circle cx="60" cy="60" r="51"></circle>
+                  <circle cx="60" cy="60" r="51" id="progressRing"></circle>
+                </svg>
+                <div>
+                  <strong id="ringText">0%</strong>
+                  <span>complete</span>
+                </div>
+              </div>
+              <div class="progress-meta">
+                <div class="bar-track"><span id="progressBar"></span></div>
+                <p id="progressNarrative"></p>
+                <div class="mini-stats">
+                  <span><b id="paidCount">0</b> paid</span>
+                  <span><b id="pendingCount">0</b> pending</span>
+                </div>
               </div>
             </div>
-            <div class="progress-meta">
-              <div class="bar-track"><span id="progressBar"></span></div>
-              <p id="progressNarrative"></p>
-              <div class="mini-stats">
-                <span><b id="paidCount">0</b> paid</span>
-                <span><b id="pendingCount">0</b> pending</span>
-              </div>
-            </div>
-          </div>
-        </section>
+          </section>
+        </div>
 
-        <section class="panel module" id="payments">
-          <div class="section-heading">
-            <div>
-              <span class="eyebrow">Payment management</span>
-              <h2>Monthly Payment History</h2>
+        <div id="tab-history" class="tab-content">
+          <section class="panel module" id="payments">
+            <div class="section-heading">
+              <div>
+                <span class="eyebrow">Payment management</span>
+                <h2>Monthly Payment History</h2>
+              </div>
+              <button class="primary-btn small" type="button" data-open-payment>Add entry</button>
             </div>
-            <button class="primary-btn small" type="button" data-open-payment>Add entry</button>
-          </div>
-          <div class="filters">
-            <label>
-              Search
-              <input id="paymentSearch" type="search" placeholder="Bank, note, mode..." />
-            </label>
-            <label>
-              Status
-              <select id="statusFilter">
-                <option value="all">All payments</option>
-                <option value="Paid">Paid</option>
-                <option value="Pending">Pending</option>
+            <div class="filters">
+              <label>
+                Search
+                <input id="paymentSearch" type="search" placeholder="Bank, note, mode..." />
+              </label>
+              <label>
+                Status
+                <select id="statusFilter">
+                  <option value="all">All payments</option>
+                  <option value="Paid">Paid</option>
+                  <option value="Pending">Pending</option>
+                </select>
+              </label>
+              <label>
+                Month
+                <input id="monthFilter" type="month" />
+              </label>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Mode</th>
+                    <th>Reference</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="paymentRows"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="panel module" id="installments">
+            <div class="section-heading">
+              <div>
+                <span class="eyebrow">Installment timeline</span>
+                <h2>Paid & Pending</h2>
+              </div>
+            </div>
+            <div class="installments" id="installmentList"></div>
+          </section>
+        </div>
+
+        <div id="tab-debt" class="tab-content">
+          <section class="panel module" id="debts">
+            <div class="section-heading">
+              <div>
+                <span class="eyebrow">Co-Funders Ledger</span>
+                <h2>Borrowing & Debts Ledger</h2>
+              </div>
+            </div>
+            
+            <form class="compact-form" id="debtForm">
+              <input id="debtName" type="text" placeholder="Funder name (e.g. Ahmad)" required />
+              <select id="debtType" required>
+                <option value="Borrowed">Borrowed</option>
+                <option value="Returned">Returned</option>
               </select>
-            </label>
-            <label>
-              Month
-              <input id="monthFilter" type="month" />
-            </label>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Mode</th>
-                  <th>Reference</th>
-                  <th>Amount</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="paymentRows"></tbody>
-            </table>
-          </div>
-        </section>
-
-        <section class="panel module">
-          <div class="section-heading">
-            <div>
-              <span class="eyebrow">Installment timeline</span>
-              <h2>Paid & Pending</h2>
+              <input id="debtAmount" type="number" min="1" placeholder="Amount (INR)" required />
+              <input id="debtDate" type="date" required />
+              <input id="debtNote" type="text" placeholder="Note (optional)" style="flex: 1;" />
+              <button class="primary-btn small" type="submit">Log</button>
+            </form>
+            
+            <div class="section-heading" style="margin-top: 28px; margin-bottom: 12px;">
+              <div>
+                <span class="eyebrow">Summary metrics</span>
+                <h3>Outstanding Balances</h3>
+              </div>
             </div>
-          </div>
-          <div class="installments" id="installmentList"></div>
-        </section>
-
-        <section class="panel module" id="debts">
-          <div class="section-heading">
-            <div>
-              <span class="eyebrow">Co-Funders Ledger</span>
-              <h2>Borrowing & Debts Ledger</h2>
+            <div class="table-wrap" style="margin-bottom: 28px;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Funder</th>
+                    <th>Total Borrowed</th>
+                    <th>Total Returned</th>
+                    <th>Net Outstanding Balance</th>
+                  </tr>
+                </thead>
+                <tbody id="debtSummaryRows"></tbody>
+              </table>
             </div>
-          </div>
-          
-          <form class="compact-form" id="debtForm">
-            <input id="debtName" type="text" placeholder="Funder name (e.g. Ahmad)" required />
-            <select id="debtType" required>
-              <option value="Borrowed">Borrowed</option>
-              <option value="Returned">Returned</option>
-            </select>
-            <input id="debtAmount" type="number" min="1" placeholder="Amount (INR)" required />
-            <input id="debtDate" type="date" required />
-            <input id="debtNote" type="text" placeholder="Note (optional)" style="flex: 1;" />
-            <button class="primary-btn small" type="submit">Log</button>
-          </form>
-          
-          <div class="section-heading" style="margin-top: 28px; margin-bottom: 12px;">
-            <div>
-              <span class="eyebrow">Summary metrics</span>
-              <h3>Outstanding Balances</h3>
+            
+            <div class="section-heading" style="margin-top: 28px; margin-bottom: 12px;">
+              <div>
+                <span class="eyebrow">Individual logs</span>
+                <h3>Transaction Logs</h3>
+              </div>
             </div>
-          </div>
-          <div class="table-wrap" style="margin-bottom: 28px;">
-            <table>
-              <thead>
-                <tr>
-                  <th>Funder</th>
-                  <th>Total Borrowed</th>
-                  <th>Total Returned</th>
-                  <th>Net Outstanding Balance</th>
-                </tr>
-              </thead>
-              <tbody id="debtSummaryRows"></tbody>
-            </table>
-          </div>
-          
-          <div class="section-heading" style="margin-top: 28px; margin-bottom: 12px;">
-            <div>
-              <span class="eyebrow">Individual logs</span>
-              <h3>Transaction Logs</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Funder</th>
+                    <th>Action</th>
+                    <th>Amount</th>
+                    <th>Note</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="debtLogRows"></tbody>
+              </table>
             </div>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Funder</th>
-                  <th>Action</th>
-                  <th>Amount</th>
-                  <th>Note</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody id="debtLogRows"></tbody>
-            </table>
-          </div>
-        </section>
+          </section>
+        </div>
       </main>
     </div>
 

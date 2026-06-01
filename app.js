@@ -110,6 +110,29 @@ function expectedCompletionDate() {
   date.setMonth(date.getMonth() + months);
   return new Intl.DateTimeFormat("en-IN", { month: "short", year: "numeric" }).format(date);
 }
+function switchTab(tabId) {
+  $$(".tab-content").forEach((el) => el.classList.remove("active"));
+  const tabEl = $(`#tab-${tabId}`);
+  if (tabEl) tabEl.classList.add("active");
+
+  // Update desktop sidebar
+  $$(".nav-list a").forEach((el) => {
+    el.classList.remove("active");
+    if (el.getAttribute("data-tab-link") === tabId) {
+      el.classList.add("active");
+    }
+  });
+
+  // Update mobile bottom nav
+  $$(".mobile-nav-item").forEach((el) => {
+    el.classList.remove("active");
+    if (el.getAttribute("data-tab") === tabId) {
+      el.classList.add("active");
+    }
+  });
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
 
 function render() {
   document.documentElement.dataset.theme = state.theme;
@@ -321,6 +344,13 @@ document.addEventListener("click", (event) => {
   const target = event.target.closest("button, a");
   if (!target) return;
 
+  const tabId = target.getAttribute("data-tab") || target.getAttribute("data-tab-link");
+  if (tabId) {
+    event.preventDefault();
+    switchTab(tabId);
+    return;
+  }
+
   if (target.matches("[data-open-payment]")) openPaymentDialog();
 
   if (target.id === "exportToggle") {
@@ -340,11 +370,6 @@ document.addEventListener("click", (event) => {
   if (deleteDebtId) {
     state.debts = state.debts.filter((d) => d.id !== deleteDebtId);
     render();
-  }
-
-  if (target.closest(".mobile-nav-item")) {
-    $$(".mobile-nav-item").forEach((item) => item.classList.remove("active"));
-    target.closest(".mobile-nav-item").classList.add("active");
   }
 
   if (target.closest(".nav-list a")) closeMobileMenu();

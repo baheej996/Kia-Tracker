@@ -1367,6 +1367,26 @@ menu {
     padding-bottom: 78px;
   }
 }
+/* Tab Content Switching */
+.tab-content {
+  display: none;
+  animation: tabFadeIn 0.3s ease both;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+@keyframes tabFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
 @media print {
   .sidebar,
