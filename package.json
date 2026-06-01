@@ -1,0 +1,9 @@
+{
+  "name": "sonetpay-tracker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Premium Kia Sonet payment and ownership tracker.",
+  "scripts": {
+    "start": "node server.js"
+  }
+}
