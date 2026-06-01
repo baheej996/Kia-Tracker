@@ -562,6 +562,7 @@ if ("serviceWorker" in navigator) {
 let deferredPrompt = null;
 const pwaBanner = $("#pwaInstallBanner");
 const btnInstallPwa = $("#btnInstallPwa");
+const pwaTitle = $("#pwaTitle");
 const pwaInstructions = $("#pwaInstructions");
 
 // Detect Standalone/Installed Mode
@@ -580,8 +581,11 @@ if (!isStandalone) {
   if (isIOS) {
     if (pwaBanner) {
       pwaBanner.style.display = "flex";
+      if (pwaTitle) {
+        pwaTitle.textContent = "Install App";
+      }
       if (pwaInstructions) {
-        pwaInstructions.textContent = "Tap Share icon below, then 'Add to Home Screen' to install.";
+        pwaInstructions.textContent = "Tap Share > Add to Home Screen";
       }
       if (btnInstallPwa) {
         btnInstallPwa.textContent = "Okay";

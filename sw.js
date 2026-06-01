@@ -1,13 +1,13 @@
-const CACHE_NAME = "sonetpay-v20260601-pwa-popup";
+const CACHE_NAME = "sonetpay-v20260601-pwa-popup-v2";
 const ASSETS = [
   "./",
   "./index.html",
-  "./styles.css?v=20260601-pwa-popup",
-  "./app.js?v=20260601-pwa-popup",
-  "./manifest.json?v=20260601-pwa-popup",
+  "./styles.css?v=20260601-pwa-popup-v2",
+  "./app.js?v=20260601-pwa-popup-v2",
+  "./manifest.json?v=20260601-pwa-popup-v2",
   "./Public/Sonet.png",
-  "./Public/icon-192.png?v=20260601-pwa-popup",
-  "./Public/icon-512.png?v=20260601-pwa-popup"
+  "./Public/icon-192.png?v=20260601-pwa-popup-v2",
+  "./Public/icon-512.png?v=20260601-pwa-popup-v2"
 ];
 
 // Install Event
