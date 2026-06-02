@@ -1,10 +1,10 @@
-const CACHE_NAME = "sonetpay-v20260601-pwa-popup-v6";
+const CACHE_NAME = "sonetpay-v20260601-pwa-popup-v7";
 const ASSETS = [
   "./",
   "./index.html",
-  "./styles.css?v=20260601-pwa-popup-v6",
-  "./app.js?v=20260601-pwa-popup-v6",
-  "./manifest.json?v=20260601-pwa-popup-v6",
+  "./styles.css?v=20260601-pwa-popup-v7",
+  "./app.js?v=20260601-pwa-popup-v7",
+  "./manifest.json?v=20260601-pwa-popup-v7",
   "./Public/Sonet.png",
   "./Public/icon-192.png?v=20260601-pwa-popup-v6",
   "./Public/icon-512.png?v=20260601-pwa-popup-v6"
