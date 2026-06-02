@@ -342,34 +342,58 @@ function switchTab(tabId) {
 }
 
 function switchSubTab(subTabId) {
-  $$(".sub-tab-btn").forEach((el) => {
+  const isDebt = subTabId.startsWith("debt-");
+
+  // Update buttons within the relevant main tab
+  const buttons = isDebt 
+    ? $$("#tab-debt .sub-tab-btn") 
+    : $$("#tab-history .sub-tab-btn");
+
+  buttons.forEach((el) => {
     el.classList.remove("active");
     if (el.getAttribute("data-sub-tab") === subTabId) {
       el.classList.add("active");
     }
   });
 
-  const paymentsContent = $("#sub-tab-payments");
-  const timelineContent = $("#sub-tab-timeline");
+  if (isDebt) {
+    const summaryContent = $("#sub-tab-debt-summary");
+    const logsContent = $("#sub-tab-debt-logs");
 
-  if (subTabId === "timeline") {
-    paymentsContent.classList.remove("active");
-    timelineContent.classList.add("active");
-    paymentsContent.style.display = "none";
-    timelineContent.style.display = "block";
-  } else {
-    paymentsContent.classList.add("active");
-    timelineContent.classList.remove("active");
-    paymentsContent.style.display = "block";
-    timelineContent.style.display = "none";
-
-    const select = $("#statusFilter");
-    if (subTabId === "pending") {
-      select.value = "Pending";
-    } else if (subTabId === "completed") {
-      select.value = "Paid";
+    if (subTabId === "debt-summary") {
+      summaryContent.classList.add("active");
+      logsContent.classList.remove("active");
+      summaryContent.style.display = "block";
+      logsContent.style.display = "none";
+    } else {
+      summaryContent.classList.remove("active");
+      logsContent.classList.add("active");
+      summaryContent.style.display = "none";
+      logsContent.style.display = "block";
     }
-    renderPayments();
+  } else {
+    const paymentsContent = $("#sub-tab-payments");
+    const timelineContent = $("#sub-tab-timeline");
+
+    if (subTabId === "timeline") {
+      paymentsContent.classList.remove("active");
+      timelineContent.classList.add("active");
+      paymentsContent.style.display = "none";
+      timelineContent.style.display = "block";
+    } else {
+      paymentsContent.classList.add("active");
+      timelineContent.classList.remove("active");
+      paymentsContent.style.display = "block";
+      timelineContent.style.display = "none";
+
+      const select = $("#statusFilter");
+      if (subTabId === "pending") {
+        select.value = "Pending";
+      } else if (subTabId === "completed") {
+        select.value = "Paid";
+      }
+      renderPayments();
+    }
   }
 }
 
