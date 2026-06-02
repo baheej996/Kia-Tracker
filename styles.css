@@ -889,7 +889,8 @@ menu {
   .sidebar {
     display: grid;
     grid-template-columns: 1fr auto;
-    gap: 12px;
+    column-gap: 12px;
+    row-gap: 0;
     padding: 12px;
     border-right: 0;
     border-bottom: 1px solid var(--line);
@@ -993,6 +994,7 @@ menu {
     opacity: 1;
     transform: translateY(0);
     pointer-events: auto;
+    margin-top: 12px;
   }
 
   body.menu-open .theme-toggle {
