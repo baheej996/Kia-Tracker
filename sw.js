@@ -2,9 +2,9 @@ const CACHE_NAME = "sonetpay-v20260601-pwa-popup-v8";
 const ASSETS = [
   "./",
   "./index.html",
-  "./styles.css?v=20260601-pwa-popup-v8",
-  "./app.js?v=20260601-pwa-popup-v8",
-  "./manifest.json?v=20260601-pwa-popup-v8",
+  "./styles.css?v=20260603-pwa-popup-v9",
+  "./app.js?v=20260603-pwa-popup-v9",
+  "./manifest.json?v=20260603-pwa-popup-v9",
   "./Public/Sonet.png",
   "./Public/icon-192.png?v=20260601-pwa-popup-v6",
   "./Public/icon-512.png?v=20260601-pwa-popup-v6"
