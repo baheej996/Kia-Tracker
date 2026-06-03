@@ -493,6 +493,9 @@ function renderInstallments() {
 
 function renderDebts() {
   const aggregates = {};
+  let totalBorrowed = 0;
+  let totalReturned = 0;
+
   state.debts.forEach((d) => {
     const name = d.name.trim();
     if (!aggregates[name]) {
@@ -500,10 +503,24 @@ function renderDebts() {
     }
     if (d.type === "Borrowed") {
       aggregates[name].borrowed += Number(d.amount);
+      totalBorrowed += Number(d.amount);
     } else if (d.type === "Returned") {
       aggregates[name].returned += Number(d.amount);
+      totalReturned += Number(d.amount);
     }
   });
+
+  const netRemaining = Math.max(totalBorrowed - totalReturned, 0);
+
+  const tbEl = $("#totalBorrowedMetric");
+  if (tbEl) tbEl.textContent = INR.format(totalBorrowed);
+  const trEl = $("#totalReturnedMetric");
+  if (trEl) trEl.textContent = INR.format(totalReturned);
+  const nrEl = $("#netRemainingMetric");
+  if (nrEl) {
+    nrEl.textContent = INR.format(netRemaining);
+    nrEl.style.color = netRemaining > 0 ? "var(--red)" : "#13a15f";
+  }
 
   const summaryHtml = Object.keys(aggregates).map((name) => {
     const data = aggregates[name];
