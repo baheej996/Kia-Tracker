@@ -208,51 +208,73 @@ function updateSyncBadge(status) {
 
 let activeUnsubscribe = null;
 
-function checkSharedSession() {
-  const params = new URLSearchParams(window.location.search);
-  const shareId = params.get("id");
-  if (!shareId) return;
+function listenToCloud(shareId) {
+  if (!db || !shareId) return;
+  if (activeUnsubscribe) return;
 
-  // Enter Read-Only Mode
-  document.body.classList.add("read-only");
-  document.body.classList.add("has-shared-banner");
-  $("#sharedLiveBanner").style.display = "flex";
-  $("#cloudSyncPanel").style.display = "none";
-  updateSyncBadge("Shared View");
+  const docRef = doc(db, "trackers", shareId);
+  activeUnsubscribe = onSnapshot(docRef, (docSnap) => {
+    if (docSnap.exists()) {
+      // Ignore local writes that triggered the snapshot to prevent UI stutter/overwrite loops
+      if (docSnap.metadata.hasPendingWrites) return;
 
-  // Subscribe to live database updates via onSnapshot
-  if (db) {
-    const docRef = doc(db, "trackers", shareId);
-    activeUnsubscribe = onSnapshot(docRef, (docSnap) => {
-      if (docSnap.exists()) {
-        const data = docSnap.data();
+      const data = docSnap.data();
 
-        // Update local memory state (protect critical settings)
-        state.payments = data.payments || [];
-        state.debts = data.debts || [];
-        state.theme = data.theme || "light";
+      // Update local memory state
+      state.payments = data.payments || [];
+      state.debts = data.debts || [];
+      state.theme = data.theme || "light";
 
-        // Merge settings
+      const isReadOnly = document.body.classList.contains("read-only");
+      if (!isReadOnly) {
         state.settings = {
           ...state.settings,
           ...data.settings,
           shareId: shareId,
           isSyncEnabled: true
         };
-
-        // Render everything dynamically!
-        document.documentElement.dataset.theme = state.theme;
-        renderMetrics();
-        renderPayments();
-        renderInstallments();
-        renderDebts();
+        saveState(); // Persist changes locally but DO NOT syncToCloud
       } else {
-        console.warn("Shared document does not exist in Firestore.");
+        state.settings = {
+          ...state.settings,
+          ...data.settings,
+          shareId: shareId,
+          isSyncEnabled: true
+        };
+      }
+
+      // Render dynamically
+      document.documentElement.dataset.theme = state.theme;
+      renderMetrics();
+      renderPayments();
+      renderInstallments();
+      renderDebts();
+    } else {
+      console.warn("Shared document does not exist in Firestore.");
+      if (document.body.classList.contains("read-only")) {
         alert("The shared tracker link is invalid or has been disabled by the owner.");
       }
-    }, (error) => {
-      console.error("Firestore live snapshot failed:", error);
-    });
+    }
+  }, (error) => {
+    console.error("Firestore live snapshot failed:", error);
+  });
+}
+
+function checkSharedSession() {
+  const params = new URLSearchParams(window.location.search);
+  const shareId = params.get("id");
+  
+  if (shareId) {
+    // Shared user view (starts as Read-Only)
+    document.body.classList.add("read-only");
+    document.body.classList.add("has-shared-banner");
+    $("#sharedLiveBanner").style.display = "flex";
+    $("#cloudSyncPanel").style.display = "none";
+    updateSyncBadge("Shared View");
+    listenToCloud(shareId);
+  } else if (state.settings.isSyncEnabled && state.settings.shareId) {
+    // Original Owner opening without ID parameter
+    listenToCloud(state.settings.shareId);
   }
 }
 
@@ -272,14 +294,8 @@ async function unlockSharedSession() {
     state.settings.isSyncEnabled = true;
     saveState();
 
-    // Detach snapshot listener and re-render in Owner Mode
-    if (activeUnsubscribe) {
-      activeUnsubscribe();
-      activeUnsubscribe = null;
-    }
-
     render();
-    alert("Owner access unlocked! You can now log and edit payments.");
+    alert("Owner access unlocked! You can now log and edit payments. Live sync is still active.");
   } else {
     alert("Incorrect passcode. Editing access remains locked.");
   }
@@ -403,6 +419,9 @@ function render() {
   renderPayments();
   renderInstallments();
   renderDebts();
+}
+
+function saveAndSync() {
   saveState();
   syncToCloud();
 }
@@ -627,6 +646,7 @@ function savePaymentFromForm() {
   }
 
   $("#paymentDialog").close();
+  saveAndSync();
   render();
 }
 
@@ -708,6 +728,7 @@ $("#confirmDeleteAction").addEventListener("click", () => {
   }
   confirmType = "";
   $("#confirmDialog").close();
+  saveAndSync();
   render();
 });
 $("#confirmDialog").addEventListener("close", () => {
@@ -732,6 +753,7 @@ $("#exportPdf").addEventListener("click", () => {
 });
 $("#themeToggle").addEventListener("click", () => {
   state.theme = state.theme === "dark" ? "light" : "dark";
+  saveAndSync();
   render();
 });
 $("#debtForm").addEventListener("submit", (event) => {
@@ -746,6 +768,7 @@ $("#debtForm").addEventListener("submit", (event) => {
   });
   event.target.reset();
   $("#debtDate").value = new Date().toISOString().slice(0, 10);
+  saveAndSync();
   render();
 });
 
