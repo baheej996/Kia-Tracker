@@ -12,6 +12,14 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="apple-touch-icon" href="Public/icon-192.png?v=20260603-pwa-popup-v9" />
+    <script type="importmap">
+      {
+        "imports": {
+          "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
+          "firebase/firestore": "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"
+        }
+      }
+    </script>
   </head>
   <body>
     <!-- Floating Live Shared Banner (shown in Read-Only shared view) -->
@@ -39,10 +47,6 @@
           <a href="#home" class="active" data-tab-link="home">Overview</a>
           <a href="#history" data-tab-link="history">Payments</a>
           <a href="#debt" data-tab-link="debt">Ledger</a>
-          <button id="sidebarInstallBtn" class="ghost-btn" style="display: none; margin-top: auto; border: 1px dashed var(--line); width: 100%; justify-content: center; gap: 8px;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Install App
-          </button>
         </nav>
         <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle theme">
           <span></span>
@@ -359,7 +363,6 @@
       <a href="#debts" class="mobile-nav-item" data-tab="debt">
         <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
         <span>Debt</span>
-      </a>
     </nav>
     
     <!-- Premium PWA Install Banner Popup -->
@@ -375,13 +378,6 @@
       <button class="pwa-close" id="closePwaBanner" aria-label="Close install prompt">×</button>
     </div>
 
-    <script>
-      // Fallback inline script for UI toggles to ensure they work even if app.js fails to load due to IDE CSPs
-      document.getElementById('menuToggle').addEventListener('click', function() {
-        var isOpen = document.body.classList.toggle('menu-open');
-        this.setAttribute('aria-expanded', isOpen);
-      });
-    </script>
     <script src="app.js?v=20260603-pwa-popup-v9" type="module"></script>
   </body>
 </html>
