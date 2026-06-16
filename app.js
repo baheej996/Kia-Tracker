@@ -1,5 +1,5 @@
-import { initializeApp } from "firebase/app";
-import { getFirestore, doc, setDoc, onSnapshot } from "firebase/firestore";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // Private Firebase Configuration
 const firebaseConfig = {
@@ -30,6 +30,13 @@ const INR = new Intl.NumberFormat("en-IN", {
 const STORAGE_KEY = "sonetpay-tracker-state";
 const KFS_VERSION = "CF04058719-2026-06-01-84EMI";
 
+function generateId() {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return Date.now().toString(36) + Math.random().toString(36).substring(2);
+}
+
 function generate84Payments() {
   const payments = [];
   for (let i = 1; i <= 84; i++) {
@@ -39,7 +46,7 @@ function generate84Payments() {
     const dateStr = `${year}-${month}-05`;
 
     payments.push({
-      id: crypto.randomUUID(),
+      id: generateId(),
       date: dateStr,
       amount: 15995,
       mode: "EMI",
@@ -72,9 +79,9 @@ const seedState = {
   },
   payments: generate84Payments(),
   debts: [
-    { id: crypto.randomUUID(), name: "Father", type: "Borrowed", amount: 150000, date: "2026-04-15", note: "Downpayment support" },
-    { id: crypto.randomUUID(), name: "Father", type: "Returned", amount: 50000, date: "2026-05-20", note: "Part payment return" },
-    { id: crypto.randomUUID(), name: "Ahmad (Friend)", type: "Borrowed", amount: 30000, date: "2026-05-10", note: "Insurance cost support" }
+    { id: generateId(), name: "Father", type: "Borrowed", amount: 150000, date: "2026-04-15", note: "Downpayment support" },
+    { id: generateId(), name: "Father", type: "Returned", amount: 50000, date: "2026-05-20", note: "Part payment return" },
+    { id: generateId(), name: "Ahmad (Friend)", type: "Borrowed", amount: 30000, date: "2026-05-10", note: "Insurance cost support" }
   ],
   theme: "light"
 };
@@ -627,7 +634,7 @@ function savePaymentFromForm() {
   if (!$("#paymentForm").reportValidity()) return;
 
   const payment = {
-    id: $("#paymentId").value || crypto.randomUUID(),
+    id: $("#paymentId").value || generateId(),
     date: $("#paymentDate").value,
     amount: Number($("#paymentAmount").value),
     mode: $("#paymentMode").value.trim(),
@@ -684,6 +691,9 @@ document.addEventListener("click", (event) => {
   if (tabId) {
     event.preventDefault();
     switchTab(tabId);
+    if (target.closest(".nav-list a") || target.closest(".mobile-nav-item")) {
+      closeMobileMenu();
+    }
     return;
   }
 
@@ -736,10 +746,7 @@ $("#confirmDialog").addEventListener("close", () => {
   pendingDeleteDebtId = "";
   confirmType = "";
 });
-$("#menuToggle").addEventListener("click", () => {
-  const isOpen = document.body.classList.toggle("menu-open");
-  $("#menuToggle").setAttribute("aria-expanded", String(isOpen));
-});
+
 $("#paymentSearch").addEventListener("input", renderPayments);
 $("#statusFilter").addEventListener("change", renderPayments);
 $("#monthFilter").addEventListener("change", renderPayments);
@@ -759,7 +766,7 @@ $("#themeToggle").addEventListener("click", () => {
 $("#debtForm").addEventListener("submit", (event) => {
   event.preventDefault();
   state.debts.push({
-    id: crypto.randomUUID(),
+    id: generateId(),
     name: $("#debtName").value.trim(),
     type: $("#debtType").value,
     amount: Number($("#debtAmount").value),
